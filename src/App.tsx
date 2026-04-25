@@ -38,7 +38,7 @@ const WhatsappIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
-import doctorImage from './assets/dr-shivrani.jpg';
+import { doctorImageBase64 as doctorImage } from './doctorImage';
 const phoneNumber = "9229396272";
 const whatsappUrl = `https://wa.me/91${phoneNumber}?text=Hi Dr. Shivrani, I would like to book an online consultation.`;
 
@@ -287,6 +287,7 @@ const Hero = () => {
                 src={doctorImage} 
                 alt="Doctor consulting" 
                 className="object-cover w-full h-full"
+                referrerPolicy="no-referrer"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-slate-900/20 to-transparent"></div>
               
