@@ -38,8 +38,7 @@ const WhatsappIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
-// @ts-ignore
-const doctorImage = 'https://drive.google.com/uc?export=view&id=1xvCoYLbquCQ178beYInuauYGI6r6Btu1';
+import doctorImage from './assets/dr-shivrani.jpg';
 const phoneNumber = "9229396272";
 const whatsappUrl = `https://wa.me/91${phoneNumber}?text=Hi Dr. Shivrani, I would like to book an online consultation.`;
 
