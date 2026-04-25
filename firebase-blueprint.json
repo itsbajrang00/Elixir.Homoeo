@@ -1,0 +1,38 @@
+{
+  "entities": {
+    "Review": {
+      "title": "Review",
+      "description": "A review for the doctor.",
+      "type": "object",
+      "properties": {
+        "reviewerId": {
+          "type": "string",
+          "description": "UID of the user who wrote the review"
+        },
+        "reviewerName": {
+          "type": "string"
+        },
+        "rating": {
+          "type": "number",
+          "description": "Rating from 1 to 5"
+        },
+        "comment": {
+          "type": "string",
+          "description": "Review text"
+        },
+        "createdAt": {
+          "type": "timestamp"
+        }
+      },
+      "required": ["reviewerId", "reviewerName", "rating", "comment", "createdAt"]
+    }
+  },
+  "firestore": {
+    "reviews/{reviewId}": {
+      "schema": {
+        "$ref": "#/entities/Review"
+      },
+      "description": "Reviews left by patients"
+    }
+  }
+}

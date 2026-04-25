@@ -1,0 +1,48 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Phase 3: Primitive Definition
+    function isValidId(id) { 
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); 
+    }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+    function isSignedIn() { return request.auth != null; }
+
+    // Phase 4: Validations
+    function isValidReview(data) {
+      return data.keys().hasAll(['reviewerId', 'reviewerName', 'rating', 'comment', 'createdAt']) &&
+             data.keys().size() == 5 &&
+             data.reviewerId is string && data.reviewerId.size() > 0 && data.reviewerId.size() <= 128 &&
+             data.reviewerName is string && data.reviewerName.size() > 0 && data.reviewerName.size() <= 100 &&
+             data.rating is number && data.rating >= 1 && data.rating <= 5 &&
+             data.comment is string && data.comment.size() > 0 && data.comment.size() <= 1000 &&
+             data.createdAt == request.time;
+    }
+
+    // Reviews Collection
+    match /reviews/{reviewId} {
+      // Any public user can read reviews, checking only that the ID is valid for single reads,
+      // and checking the resource for list queries (though they are public, we could just allow all).
+      allow get: if isValidId(reviewId);
+      allow list: if true;
+
+      allow create: if isSignedIn() &&
+                       // It might be better to check email_verified but Google signin handles this fine, let's keep it safe.
+                       // Actually, the rules ask: "For all standard write operations... you MUST strictly mandate that the user is verified using request.auth.token.email_verified == true."
+                       request.auth.token.email_verified == true &&
+                       isValidId(reviewId) &&
+                       isValidReview(incoming()) &&
+                       incoming().reviewerId == request.auth.uid;
+      
+      allow update: if false;
+      allow delete: if false;
+    }
+  }
+}
