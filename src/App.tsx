@@ -606,6 +606,18 @@ const FAQ = () => {
 };
 
 const Contact = () => {
+  const [submitted, setSubmitted] = useState(false);
+  const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [desc, setDesc] = useState('');
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitted(true);
+    // Optionally trigger WhatsApp here if desired, e.g.:
+    // window.open(`https://wa.me/91${phoneNumber}?text=Hi, I am ${name}. Phone: ${phone}. Condition: ${desc}`, '_blank');
+  };
+
   return (
     <section id="contact" className="py-16 md:py-20 bg-slate-50 relative pb-32">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -710,44 +722,66 @@ const Contact = () => {
             className="bg-white p-8 md:p-10 rounded-[2rem] shadow-xl border border-slate-100"
           >
             <h3 className="text-2xl font-bold text-slate-900 mb-6">Book an Appointment</h3>
-            <form className="space-y-6" onSubmit={(e) => {
-                e.preventDefault();
-                alert("Thank you! However, for prompt response, please contact via WhatsApp or Call.");
-            }}>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Full Name</label>
-                <input 
-                  type="text" 
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-colors"
-                  placeholder="John Doe"
-                  required
-                />
+            {submitted ? (
+              <div className="bg-green-50 border border-green-100 rounded-2xl p-6 text-center">
+                <CheckCircle2 className="w-16 h-16 text-green-500 mx-auto mb-4" />
+                <h4 className="text-xl font-bold text-slate-900 mb-2">Request Sent!</h4>
+                <p className="text-slate-600 mb-6">We have received your request. We will get back to you shortly.</p>
+                
+                <p className="text-sm font-medium text-slate-500 mb-3">For a faster response, you can directly send your details to us on WhatsApp:</p>
+                <a 
+                  href={`https://wa.me/91${phoneNumber}?text=Hi Dr. Shivrani, I have submitted a consultation request. My name is ${name}. Phone: ${phone}. Condition: ${desc}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full inline-flex items-center justify-center gap-2 bg-[#25D366] text-white px-6 py-3 rounded-xl font-medium hover:bg-[#1ebd57] transition-colors"
+                >
+                  <MessageCircle className="w-5 h-5" />
+                  Continue on WhatsApp
+                </a>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Phone Number</label>
-                <input 
-                  type="tel" 
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-colors"
-                  placeholder="+91"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Briefly describe your condition</label>
-                <textarea 
-                  rows={4}
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-colors resize-none"
-                  placeholder="Tell us about the symptoms you're experiencing..."
-                  required
-                ></textarea>
-              </div>
-              <button 
-                type="submit"
-                className="w-full bg-slate-900 text-white font-bold py-4 rounded-xl hover:bg-primary-600 transition-colors flex items-center justify-center gap-2"
-              >
-                Send Request <ArrowRight className="w-4 h-4" />
-              </button>
-            </form>
+            ) : (
+              <form className="space-y-6" onSubmit={handleSubmit}>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Full Name</label>
+                  <input 
+                    type="text" 
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-colors"
+                    placeholder="John Doe"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Phone Number</label>
+                  <input 
+                    type="tel" 
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-colors"
+                    placeholder="+91"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Briefly describe your condition</label>
+                  <textarea 
+                    rows={4}
+                    value={desc}
+                    onChange={(e) => setDesc(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-colors resize-none"
+                    placeholder="Tell us about the symptoms you're experiencing..."
+                    required
+                  ></textarea>
+                </div>
+                <button 
+                  type="submit"
+                  className="w-full bg-slate-900 text-white font-bold py-4 rounded-xl hover:bg-primary-600 transition-colors flex items-center justify-center gap-2"
+                >
+                  Send Request <ArrowRight className="w-4 h-4" />
+                </button>
+              </form>
+            )}
           </motion.div>
         </div>
       </div>

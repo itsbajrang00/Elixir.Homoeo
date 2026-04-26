@@ -57,18 +57,49 @@ export function ReviewSection() {
   };
 
   const handleAddReviewClick = () => {
-    if (!user) {
-      handleLogin().then(() => {
-        if (auth.currentUser) setIsModalOpen(true);
-      });
-    } else {
-      setIsModalOpen(true);
-    }
+    setIsModalOpen(true);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) return;
+    if (!user) {
+        // Try to log in first
+        setErrorMsg('');
+        try {
+          const provider = new GoogleAuthProvider();
+          await signInWithPopup(auth, provider);
+          // if it succeeds, user state will update via onAuthStateChanged, but we need the current user NOW
+          if (auth.currentUser) {
+              setSubmitting(true);
+              try {
+                const newReviewRef = doc(collection(db, 'reviews'));
+                await setDoc(newReviewRef, {
+                  reviewerId: auth.currentUser.uid,
+                  reviewerName: auth.currentUser.displayName || 'Anonymous User',
+                  rating,
+                  comment,
+                  createdAt: serverTimestamp()
+                });
+                setIsModalOpen(false);
+                setComment('');
+                setRating(5);
+              } catch (error) {
+                handleFirestoreError(error, OperationType.CREATE, `reviews/${auth.currentUser.uid}`);
+              } finally {
+                setSubmitting(false);
+              }
+          }
+        } catch (err: any) {
+          if (err.code === 'auth/popup-closed-by-user') {
+            console.log('Sign in cancelled by user');
+          } else {
+            console.error('Login error:', err);
+            setErrorMsg('Google Sign-In was blocked. Please open this website in a new tab (using the button at the top right of the preview) to write a review.');
+          }
+        }
+        return;
+    }
+
     setSubmitting(true);
     try {
       const newReviewRef = doc(collection(db, 'reviews'));
@@ -186,6 +217,12 @@ export function ReviewSection() {
                     placeholder="Share details of your consultation..."
                   ></textarea>
                 </div>
+                
+                {errorMsg && (
+                  <div className="p-3 bg-red-50 border border-red-200 rounded-xl">
+                    <p className="text-red-600 text-sm">{errorMsg}</p>
+                  </div>
+                )}
 
                 <div className="flex items-center space-x-3 pt-2">
                   <button
