@@ -21,6 +21,7 @@ export function ReviewSection() {
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [showAllReviews, setShowAllReviews] = useState(false);
 
   const [errorMsg, setErrorMsg] = useState('');
 
@@ -178,7 +179,8 @@ export function ReviewSection() {
     }
   ];
 
-  const displayReviews = [...validDbReviews, ...staticReviews];
+  const displayReviews = [...staticReviews, ...validDbReviews];
+  const visibleReviews = showAllReviews ? displayReviews : displayReviews.slice(0, 3);
 
   return (
     <section className="py-16 bg-slate-50" id="reviews">
@@ -208,9 +210,9 @@ export function ReviewSection() {
           {errorMsg && <p className="text-red-500 text-sm mt-2">{errorMsg}</p>}
         </div>
 
-        {displayReviews.length > 0 && (
+        {visibleReviews.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {displayReviews.map(r => (
+            {visibleReviews.map(r => (
               <div key={r.id} className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
                 <div className="flex items-center justify-between mb-4">
                   <div>
@@ -225,6 +227,17 @@ export function ReviewSection() {
                 {r.comment && <p className="text-slate-700 text-sm leading-relaxed">{r.comment}</p>}
               </div>
             ))}
+          </div>
+        )}
+
+        {displayReviews.length > 3 && (
+          <div className="text-center mt-10">
+            <button 
+              onClick={() => setShowAllReviews(!showAllReviews)}
+              className="inline-flex items-center justify-center px-6 py-3 border border-primary-200 text-primary-700 font-medium rounded-xl hover:bg-primary-50 hover:border-primary-300 transition-colors"
+            >
+              {showAllReviews ? 'Show Less' : 'View More Reviews'}
+            </button>
           </div>
         )}
 
