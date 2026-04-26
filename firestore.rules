@@ -22,7 +22,7 @@ service cloud.firestore {
              data.reviewerId is string && data.reviewerId.size() > 0 && data.reviewerId.size() <= 128 &&
              data.reviewerName is string && data.reviewerName.size() > 0 && data.reviewerName.size() <= 100 &&
              data.rating is number && data.rating >= 1 && data.rating <= 5 &&
-             data.comment is string && data.comment.size() > 0 && data.comment.size() <= 1000 &&
+             data.comment is string && data.comment.size() >= 0 && data.comment.size() <= 1000 &&
              data.createdAt == request.time;
     }
 

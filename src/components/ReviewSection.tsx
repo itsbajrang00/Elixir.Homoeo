@@ -51,7 +51,11 @@ export function ReviewSection() {
         console.log('Sign in cancelled by user');
       } else {
         console.error('Login error:', err);
-        setErrorMsg('Login failed. If popups are blocked, please open the website in a new tab to sign in.');
+        if (err.code === 'auth/unauthorized-domain') {
+            setErrorMsg('Error: Unauthorized domain. Please add these domains to Firebase Console > Authentication > Settings > Authorized Domains: ais-dev-6r5ti66zlsjzl7uewpiuvp-234380975154.asia-southeast1.run.app AND ais-pre-6r5ti66zlsjzl7uewpiuvp-234380975154.asia-southeast1.run.app');
+        } else {
+            setErrorMsg(`Login Error: ${err.message}. If popups are blocked, please open this in a new tab.`);
+        }
       }
     }
   };
@@ -94,7 +98,11 @@ export function ReviewSection() {
             console.log('Sign in cancelled by user');
           } else {
             console.error('Login error:', err);
-            setErrorMsg('Google Sign-In was blocked. Please open this website in a new tab (using the button at the top right of the preview) to write a review.');
+            if (err.code === 'auth/unauthorized-domain') {
+              setErrorMsg('Error: Unauthorized domain. Please add these domains to Firebase Console > Authentication > Settings > Authorized Domains: ais-dev-6r5ti66zlsjzl7uewpiuvp-234380975154.asia-southeast1.run.app AND ais-pre-6r5ti66zlsjzl7uewpiuvp-234380975154.asia-southeast1.run.app');
+            } else {
+              setErrorMsg(`Login Error: ${err.message}. If popups are blocked, please open this in a new tab.`);
+            }
           }
         }
         return;
@@ -133,12 +141,30 @@ export function ReviewSection() {
     return <div className="flex space-x-1">{stars}</div>;
   };
 
+  const baseRatingsCount = 28;
+  const baseAvgRating = 4.9;
+  const dbRatingsCount = reviews.length;
+  
+  const totalRatings = baseRatingsCount + dbRatingsCount;
+  const totalRatingSum = (baseRatingsCount * baseAvgRating) + reviews.reduce((sum, r) => sum + r.rating, 0);
+  const averageRating = (totalRatingSum / totalRatings).toFixed(1);
+
   return (
-    <section className="py-16 bg-white" id="reviews">
+    <section className="py-16 bg-slate-50" id="reviews">
       <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
-        <div className="text-center mb-12">
+        <div className="text-center mb-8">
           <h2 className="text-3xl md:text-4xl font-serif text-slate-900 mb-4 tracking-tight">Patient Reviews</h2>
-          <p className="text-slate-600 max-w-2xl mx-auto text-lg">Hear what our patients have to say about their healing journey.</p>
+          <p className="text-slate-600 max-w-2xl mx-auto text-lg mb-6">Hear what our patients have to say about their healing journey.</p>
+          
+          <div className="flex flex-col items-center justify-center gap-2 mb-8">
+            <div className="flex items-center space-x-3">
+              <span className="text-4xl font-bold text-slate-900">{averageRating}</span>
+              <div className="flex flex-col items-start">
+                {renderStars(Math.round(Number(averageRating)))}
+                <span className="text-sm text-slate-500 mt-1">Based on {totalRatings} {totalRatings === 1 ? 'review' : 'reviews'}</span>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div className="flex flex-col items-end mb-8">
@@ -165,7 +191,7 @@ export function ReviewSection() {
                   </div>
                   {renderStars(r.rating)}
                 </div>
-                <p className="text-slate-700 text-sm leading-relaxed">{r.comment}</p>
+                {r.comment && <p className="text-slate-700 text-sm leading-relaxed">{r.comment}</p>}
               </div>
             ))}
           </div>
@@ -205,10 +231,9 @@ export function ReviewSection() {
                 </div>
                 
                 <div>
-                  <label htmlFor="comment" className="block text-sm font-medium text-slate-700 mb-2">Your Experience</label>
+                  <label htmlFor="comment" className="block text-sm font-medium text-slate-700 mb-2">Your Experience (Optional)</label>
                   <textarea
                     id="comment"
-                    required
                     maxLength={1000}
                     rows={4}
                     value={comment}
