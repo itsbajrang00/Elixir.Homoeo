@@ -101,24 +101,6 @@ const FAQS = [
   }
 ];
 
-const TESTIMONIALS = [
-  {
-    name: "Priya Sharma",
-    review: "Dr. Shivrani is amazing! She patiently listened to all my issues and the medicines worked wonders for my PCOS.",
-    rating: 5,
-  },
-  {
-    name: "Rahul Verma",
-    review: "I had severe skin allergies for years. After 3 months of homeopathic treatment, I am almost completely cured. Highly recommend!",
-    rating: 5,
-  },
-  {
-    name: "Sunita Devi",
-    review: "Very convenient online consultation. The medicines were delivered on time and my child's immunity has significantly improved.",
-    rating: 5,
-  }
-];
-
 // Components
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -516,43 +498,6 @@ const HowItWorks = () => {
   );
 };
 
-const Testimonials = () => {
-  return (
-    <section id="testimonials" className="py-16 md:py-20 bg-slate-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <h2 className="text-primary-600 font-bold tracking-wider uppercase text-sm mb-2">Patient Stories</h2>
-          <h3 className="text-3xl md:text-4xl font-serif font-bold text-slate-900 mb-4">
-            Hear From Our Patients
-          </h3>
-        </div>
-
-        <div className="grid md:grid-cols-3 gap-8">
-          {TESTIMONIALS.map((testimonial, idx) => (
-            <motion.div 
-              key={idx}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: idx * 0.1 }}
-              className="bg-white rounded-2xl p-8 shadow-sm border border-slate-100"
-            >
-              <div className="flex items-center gap-1 mb-6">
-                {[...Array(testimonial.rating)].map((_, i) => (
-                  <Star key={i} className="w-5 h-5 text-yellow-500 fill-yellow-500" />
-                ))}
-              </div>
-              <p className="text-slate-600 leading-relaxed mb-6 italic">"{testimonial.review}"</p>
-              <h4 className="font-bold text-slate-900">{testimonial.name}</h4>
-              <p className="text-sm text-slate-500">Verified Patient</p>
-            </motion.div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-};
-
 const FAQ = () => {
   const [openIdx, setOpenIdx] = useState<number | null>(0);
 
@@ -857,7 +802,6 @@ export default function App() {
         <About />
         <Services />
         <HowItWorks />
-        <Testimonials />
         <ReviewSection />
         <FAQ />
         <Contact />
