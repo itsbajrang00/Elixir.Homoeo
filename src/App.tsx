@@ -39,7 +39,7 @@ const WhatsappIcon = ({ className }: { className?: string }) => (
 );
 
 import { doctorImageBase64 as doctorImage } from './doctorImage';
-const phoneNumber = "9229396272";
+const phoneNumber = "7903981536";
 const whatsappUrl = `https://wa.me/91${phoneNumber}?text=Hi Dr. Shivrani, I would like to book an online consultation.`;
 
 // Data
