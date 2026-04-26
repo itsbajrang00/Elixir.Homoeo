@@ -62,38 +62,32 @@ export function ReviewSection() {
   };
 
   const handleAddReviewClick = () => {
+    if (user) {
+      const existingReview = reviews.find(r => r.reviewerId === user.uid);
+      if (existingReview) {
+        setRating(existingReview.rating);
+        setComment(existingReview.comment || '');
+      } else {
+        setRating(5);
+        setComment('');
+      }
+    } else {
+      setRating(5);
+      setComment('');
+    }
     setIsModalOpen(true);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) {
-        // Try to log in first
+    let currentUser = user;
+
+    if (!currentUser) {
         setErrorMsg('');
         try {
           const provider = new GoogleAuthProvider();
           await signInWithPopup(auth, provider);
-          // if it succeeds, user state will update via onAuthStateChanged, but we need the current user NOW
-          if (auth.currentUser) {
-              setSubmitting(true);
-              try {
-                const newReviewRef = doc(collection(db, 'reviews'));
-                await setDoc(newReviewRef, {
-                  reviewerId: auth.currentUser.uid,
-                  reviewerName: auth.currentUser.displayName || 'Anonymous User',
-                  rating,
-                  comment,
-                  createdAt: serverTimestamp()
-                });
-                setIsModalOpen(false);
-                setComment('');
-                setRating(5);
-              } catch (error) {
-                handleFirestoreError(error, OperationType.CREATE, `reviews/${auth.currentUser.uid}`);
-              } finally {
-                setSubmitting(false);
-              }
-          }
+          currentUser = auth.currentUser;
         } catch (err: any) {
           if (err.code === 'auth/popup-closed-by-user') {
             console.log('Sign in cancelled by user');
@@ -105,25 +99,36 @@ export function ReviewSection() {
               setErrorMsg(`Login Error: ${err.message}. If popups are blocked, please open this in a new tab.`);
             }
           }
+          return;
         }
-        return;
     }
+
+    if (!currentUser) return;
 
     setSubmitting(true);
     try {
-      const newReviewRef = doc(collection(db, 'reviews'));
-      await setDoc(newReviewRef, {
-        reviewerId: user.uid,
-        reviewerName: user.displayName || 'Anonymous User',
-        rating,
-        comment,
-        createdAt: serverTimestamp()
-      });
+      const existingReview = reviews.find(r => r.reviewerId === currentUser!.uid);
+      const reviewRef = doc(db, 'reviews', currentUser.uid);
+
+      if (existingReview) {
+        await setDoc(reviewRef, {
+          reviewerId: currentUser.uid,
+          reviewerName: currentUser.displayName || 'Anonymous User',
+          rating,
+          comment,
+        }, { merge: true });
+      } else {
+        await setDoc(reviewRef, {
+          reviewerId: currentUser.uid,
+          reviewerName: currentUser.displayName || 'Anonymous User',
+          rating,
+          comment,
+          createdAt: serverTimestamp()
+        });
+      }
       setIsModalOpen(false);
-      setComment('');
-      setRating(5);
     } catch (error) {
-      handleFirestoreError(error, OperationType.CREATE, `reviews/${user.uid}`);
+      handleFirestoreError(error, OperationType.WRITE, `reviews/${currentUser.uid}`);
     } finally {
       setSubmitting(false);
     }
@@ -144,18 +149,25 @@ export function ReviewSection() {
 
   const baseRatingsCount = 28;
   const baseAvgRating = 4.9;
-  const dbRatingsCount = reviews.length;
+  
+  let faizCount = 0;
+  const validDbReviews = reviews.filter(r => {
+    if (r.reviewerName.toLowerCase().includes('faiz akram')) {
+      faizCount++;
+      return faizCount === 1;
+    }
+    return true;
+  });
+  const dbRatingsCount = validDbReviews.length;
   
   const totalRatings = baseRatingsCount + dbRatingsCount;
-  const totalRatingSum = (baseRatingsCount * baseAvgRating) + reviews.reduce((sum, r) => sum + r.rating, 0);
+  const totalRatingSum = (baseRatingsCount * baseAvgRating) + validDbReviews.reduce((sum, r) => sum + r.rating, 0);
   const averageRating = (totalRatingSum / totalRatings).toFixed(1);
 
-  const validDbReviews = reviews.filter(r => r.comment && r.comment.trim() !== '');
-  
   const staticReviews = [
     {
       id: "static-1",
-      reviewerId: "static",
+      reviewerId: "static-1",
       reviewerName: "Priya Sharma",
       comment: "Dr. Shivrani is amazing! She patiently listened to all my issues and the medicines worked wonders for my PCOS.",
       rating: 5,
@@ -163,7 +175,7 @@ export function ReviewSection() {
     },
     {
       id: "static-2",
-      reviewerId: "static",
+      reviewerId: "static-2",
       reviewerName: "Rahul Verma",
       comment: "I had severe skin allergies for years. After 3 months of homeopathic treatment, I am almost completely cured. Highly recommend!",
       rating: 5,
@@ -171,7 +183,7 @@ export function ReviewSection() {
     },
     {
       id: "static-3",
-      reviewerId: "static",
+      reviewerId: "static-3",
       reviewerName: "Sunita Devi",
       comment: "Very convenient online consultation. The medicines were delivered on time and my child's immunity has significantly improved.",
       rating: 5,
@@ -179,8 +191,12 @@ export function ReviewSection() {
     }
   ];
 
-  const displayReviews = [...staticReviews, ...validDbReviews];
+  const dbReviewsWithComments = validDbReviews.filter(r => r.comment && r.comment.trim() !== '');
+  const dbReviewsWithoutComments = validDbReviews.filter(r => !r.comment || r.comment.trim() === '');
+  
+  const displayReviews = [...staticReviews, ...dbReviewsWithComments, ...dbReviewsWithoutComments];
   const visibleReviews = showAllReviews ? displayReviews : displayReviews.slice(0, 3);
+  const userHasReviewed = user ? validDbReviews.some(r => r.reviewerId === user.uid) : false;
 
   return (
     <section className="py-16 bg-slate-50" id="reviews">
@@ -205,7 +221,7 @@ export function ReviewSection() {
             onClick={handleAddReviewClick}
             className="bg-primary-600 hover:bg-primary-700 text-white px-6 py-2 rounded-full font-medium transition-colors shadow-md"
           >
-            {user ? 'Add Your Review' : 'Give a review'}
+            {userHasReviewed ? 'Edit Your Review' : (user ? 'Add Your Review' : 'Give a review')}
           </button>
           {errorMsg && <p className="text-red-500 text-sm mt-2">{errorMsg}</p>}
         </div>
@@ -253,7 +269,7 @@ export function ReviewSection() {
                 </svg>
               </button>
               
-              <h3 className="text-2xl font-serif mb-6 text-slate-900">Write a Review</h3>
+              <h3 className="text-2xl font-serif mb-6 text-slate-900">{userHasReviewed ? 'Edit Your Review' : 'Write a Review'}</h3>
               
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div>

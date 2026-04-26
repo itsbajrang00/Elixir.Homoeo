@@ -34,14 +34,20 @@ service cloud.firestore {
       allow list: if true;
 
       allow create: if isSignedIn() &&
-                       // It might be better to check email_verified but Google signin handles this fine, let's keep it safe.
-                       // Actually, the rules ask: "For all standard write operations... you MUST strictly mandate that the user is verified using request.auth.token.email_verified == true."
                        request.auth.token.email_verified == true &&
                        isValidId(reviewId) &&
+                       reviewId == request.auth.uid &&
                        isValidReview(incoming()) &&
                        incoming().reviewerId == request.auth.uid;
       
-      allow update: if false;
+      allow update: if isSignedIn() &&
+                       request.auth.token.email_verified == true &&
+                       isValidId(reviewId) &&
+                       reviewId == request.auth.uid &&
+                       incoming().reviewerId == existing().reviewerId && // Do not allow changing the owner
+                       incoming().rating is number && incoming().rating >= 1 && incoming().rating <= 5 &&
+                       incoming().comment is string && incoming().comment.size() >= 0 && incoming().comment.size() <= 1000 &&
+                       incoming().reviewerName is string && incoming().reviewerName.size() > 0 && incoming().reviewerName.size() <= 100;
       allow delete: if false;
     }
   }
