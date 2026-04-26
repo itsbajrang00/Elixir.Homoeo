@@ -22,6 +22,8 @@ export function ReviewSection() {
   const [comment, setComment] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
+  const [errorMsg, setErrorMsg] = useState('');
+
   useEffect(() => {
     const unsubAuth = auth.onAuthStateChanged(setUser);
     const q = query(collection(db, 'reviews'), orderBy('createdAt', 'desc'));
@@ -40,6 +42,7 @@ export function ReviewSection() {
   }, []);
 
   const handleLogin = async () => {
+    setErrorMsg('');
     try {
       const provider = new GoogleAuthProvider();
       await signInWithPopup(auth, provider);
@@ -48,6 +51,7 @@ export function ReviewSection() {
         console.log('Sign in cancelled by user');
       } else {
         console.error('Login error:', err);
+        setErrorMsg('Login failed. If popups are blocked, please open the website in a new tab to sign in.');
       }
     }
   };
@@ -106,20 +110,17 @@ export function ReviewSection() {
           <p className="text-slate-600 max-w-2xl mx-auto text-lg">Hear what our patients have to say about their healing journey.</p>
         </div>
 
-        <div className="flex justify-end mb-8">
+        <div className="flex flex-col items-end mb-8">
           <button 
             onClick={handleAddReviewClick}
             className="bg-primary-600 hover:bg-primary-700 text-white px-6 py-2 rounded-full font-medium transition-colors shadow-md"
           >
-            {user ? 'Add Your Review' : 'Sign in to Review'}
+            {user ? 'Add Your Review' : 'Give a review'}
           </button>
+          {errorMsg && <p className="text-red-500 text-sm mt-2">{errorMsg}</p>}
         </div>
 
-        {reviews.length === 0 ? (
-          <div className="text-center py-10 bg-slate-50 rounded-2xl border border-slate-100">
-            <p className="text-slate-500">No reviews yet. Be the first to share your experience!</p>
-          </div>
-        ) : (
+        {reviews.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {reviews.map(r => (
               <div key={r.id} className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
