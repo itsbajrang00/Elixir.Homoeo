@@ -612,10 +612,10 @@ const Contact = () => {
                   <p className="text-xs sm:text-sm text-slate-500 font-medium mb-1">Consultation Fees</p>
                   <div className="flex items-center gap-3 mt-1">
                     <p className="text-xl sm:text-2xl font-bold text-slate-900">
-                      ₹99
+                      ₹199
                     </p>
                     <a 
-                      href="upi://pay?pa=dr.shivranisah143-1@oksbi&pn=Dr.%20Shivrani%20Kumari&cu=INR&am=99"
+                      href="upi://pay?pa=dr.shivranisah143-1@oksbi&pn=Dr.%20Shivrani%20Kumari&cu=INR&am=199"
                       className="inline-flex items-center gap-1.5 bg-primary-600 text-white px-3 py-1 sm:px-4 sm:py-1.5 rounded-full text-xs sm:text-sm font-semibold hover:bg-primary-700 transition-colors shadow-sm"
                     >
                       Pay Now
