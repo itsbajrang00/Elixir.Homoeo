@@ -3,7 +3,7 @@ import { db, auth } from '../firebase';
 import { collection, onSnapshot, query, orderBy, setDoc, doc, serverTimestamp, Timestamp } from 'firebase/firestore';
 import { GoogleAuthProvider, signInWithPopup, User } from 'firebase/auth';
 import { handleFirestoreError, OperationType } from '../firebaseUtils';
-import { Star, Calendar } from 'lucide-react';
+import { Star } from 'lucide-react';
 
 interface Review {
   id: string;
@@ -234,8 +234,7 @@ export function ReviewSection() {
                   <div>
                     <h3 className="font-medium text-slate-900">{r.reviewerName}</h3>
                     <div className="flex items-center text-xs text-slate-500 mt-1">
-                      <Calendar className="w-3 h-3 mr-1" />
-                      {r.createdAt ? new Date(r.createdAt.seconds * 1000).toLocaleDateString() : 'Patient Review'}
+                      Patient Review
                     </div>
                   </div>
                   {renderStars(r.rating)}
